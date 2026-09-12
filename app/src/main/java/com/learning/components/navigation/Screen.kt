@@ -9,6 +9,7 @@ sealed class Screen(val route: String, val title: String) {
     data object ExpandableScreen: Screen("expandablescreen", "Expandable FAQ")
     data object CircularProgressScreen: Screen("circularprogressscreen", "Circular Progress")
     data object OfferScreen: Screen("offerscreen", "Offer")
+    data object MyCardFly: Screen("mycardfly", "My Card Fly")
 }
 
 val allScreens = listOf(
@@ -19,4 +20,5 @@ val allScreens = listOf(
     Screen.ExpandableScreen,
     Screen.CircularProgressScreen,
     Screen.OfferScreen,
+    Screen.MyCardFly,
 )
