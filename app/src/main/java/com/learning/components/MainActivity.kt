@@ -13,8 +13,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.learning.components.navigation.NavGraph
@@ -48,7 +50,13 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                 }
-                            }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color(0xFF020B0C),
+                                titleContentColor = Color.White,
+                                navigationIconContentColor = Color.White
+                            )
+
                         )
                     }
                 ) { innerPadding ->

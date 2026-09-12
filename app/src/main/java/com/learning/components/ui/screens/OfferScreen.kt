@@ -1,14 +1,13 @@
 package com.learning.components.ui.screens
 
+import android.R.id.copy
 import android.graphics.BlurMaskFilter
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,11 +21,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,33 +49,52 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.fontscaling.MathUtils.lerp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
-import com.learning.components.navigation.Screen
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 @Composable
 fun OfferScreen() {
-    val pagerState = rememberPagerState(initialPage = 1, pageCount = { 6 })
-    var isDraggingCard by remember { mutableStateOf(false) }
-    var showOfferPopup by remember { mutableStateOf(false) }
 
-    var offsetY by remember { mutableFloatStateOf(0f) }
+    var lastDraggedImage by remember {
+        mutableIntStateOf(0)
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = 1,
+        pageCount = { 6 }
+    )
+
+    var isDraggingCard by remember {
+        mutableStateOf(false)
+    }
+
+    var showOfferPopup by remember {
+        mutableStateOf(false)
+    }
+
+    var offsetY by remember {
+        mutableFloatStateOf(0f)
+    }
+
     val scope = rememberCoroutineScope()
-    val animatedOffsetY = remember { Animatable(0f) }
 
+    val animatedOffsetY = remember {
+        androidx.compose.animation.core.Animatable(0f)
+    }
 
     val images = listOf(
-        "https://images.unsplash.com/photo-1500534623283-312aade485b7",
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e",
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
-        "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
-        "https://images.unsplash.com/photo-1469474968028-56623f02e42e"
+        "https://i.pinimg.com/1200x/15/6e/71/156e71d0d1c64f6e774ac7e548f88fcf.jpg",
+        "https://i.pinimg.com/736x/9c/c5/ec/9cc5ec8f358cbb2479a1d845ba7494f9.jpg",
+        "https://i.pinimg.com/1200x/02/2c/8c/022c8c3ce9953af6e2daf2b95de33d37.jpg",
+        "https://i.pinimg.com/1200x/02/43/a4/0243a44a94588b1bce4c53e335ef94d5.jpg",
+        "https://i.pinimg.com/736x/8c/bc/e9/8cbce971d2ddfc3049656debb598b545.jpg",
+        "https://i.pinimg.com/736x/6f/80/15/6f80157b0c8db85ad38db7d3bd1fec16.jpgg"
     )
 
     val dropThreshold = 1000f
@@ -82,103 +102,299 @@ fun OfferScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFFFF)),
-        contentAlignment = Alignment.Center
+            .background(Color(0xFF020B0C))
     ) {
+
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(60.dp))
 
-            HorizontalPager(
-                state = pagerState,
-                contentPadding = PaddingValues(start = 100.dp, end = 40.dp),
+            Spacer(
+                modifier = Modifier.height(60.dp)
+            )
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(620.dp)
-            ) { page ->
-                val pageOffset = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
-                val isCenter = page == pagerState.currentPage
-                val cardOffsetY = if (isCenter) animatedOffsetY.value + offsetY else 0f
+            ) {
 
                 Box(
                     modifier = Modifier
-                        .graphicsLayer {
-                            val pageAbsOffset = pageOffset.absoluteValue
-                            rotationZ = lerp(
-                                start = 0f,
-                                stop = if (pageOffset > 0) 25f else -25f,
-                                fraction = pageAbsOffset.coerceIn(0f, 1f)
-                            )
-                            scaleX = lerp(start = 1f, stop = 0.82f, fraction = pageAbsOffset)
-                            scaleY = lerp(start = 1f, stop = 0.82f, fraction = pageAbsOffset)
-                            translationX = lerp(
-                                start = 0f,
-                                stop = if (pageOffset > 0) 30f else -30f,
-                                fraction = pageAbsOffset
-                            )
-                            cameraDistance = 12 * density
-                        }
-                        .offset {
-                            IntOffset(0, cardOffsetY.roundToInt())
-                        }
-                        .then(
-                            if (isCenter) {
-                                Modifier.pointerInput(Unit) {
-                                    detectDragGestures(
-                                        onDragStart = { isDraggingCard = true },
-                                        onDragEnd = {
-                                            isDraggingCard = false
-                                            if (offsetY > dropThreshold) {
-                                                scope.launch {
-                                                    animatedOffsetY.animateTo(900f)
-                                                    showOfferPopup = true
-                                                }
-                                            } else {
-                                                offsetY = 0f
-                                                scope.launch { animatedOffsetY.animateTo(0f) }
-                                            }
-                                        },
-                                        onDrag = { change, dragAmount ->
-                                            change.consume()
-                                            offsetY = (offsetY + dragAmount.y).coerceAtLeast(0f)
-                                        }
-                                    )
-                                }
-                            } else Modifier
+                        .align(Alignment.Center)
+                        .size(
+                            width = 270.dp,
+                            height = 270.dp
                         )
-                ) {
-                    OfferCardItem(
-                        title = "",
-                        isCenter = isCenter,
-                        imageUrl = images[page],
-                        glowColor = Color(0xFFE0DAD3)
-                    )
+
+                        .border(
+                            width = 1.5.dp,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0x8BF9A825).copy(
+                                        alpha = 0.4f
+                                    ),
+                                    Color(0x8CF9A81E).copy(
+                                        alpha = 0.9f
+                                    ),
+                                )
+                            ),
+                            shape = RoundedCornerShape(
+                                topStart = 36.dp,
+                                topEnd = 36.dp,
+                                bottomEnd = 36.dp,
+                                bottomStart = 36.dp
+                            ),
+
+                        ),
+                )
+
+                HorizontalPager(
+                    state = pagerState,
+                    contentPadding = PaddingValues(
+                        start = 105.dp,
+                        end = 40.dp
+                    ),
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+
+                    val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+
+                    val isCenter = page == pagerState.currentPage
+
+                    val cardOffsetY =
+                        if (isCenter) {
+                            animatedOffsetY.value + offsetY
+                        } else {
+                            0f
+                        }
+
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer {
+
+                                val pageAbsOffset =
+                                    pageOffset.absoluteValue
+
+                                rotationZ = lerp(
+                                    start = 0f,
+                                    stop = if (pageOffset > 0) {
+                                        25f
+                                    } else {
+                                        -25f
+                                    },
+                                    fraction = pageAbsOffset.coerceIn(
+                                        0f,
+                                        1f
+                                    )
+                                )
+
+                                scaleX = lerp(
+                                    start = 1f,
+                                    stop = 0.82f,
+                                    fraction = pageAbsOffset
+                                )
+
+                                scaleY = lerp(
+                                    start = 1f,
+                                    stop = 0.82f,
+                                    fraction = pageAbsOffset
+                                )
+
+                                translationX = lerp(
+                                    start = 0f,
+                                    stop = if (pageOffset > 0) {
+                                        30f
+                                    } else {
+                                        -30f
+                                    },
+                                    fraction = pageAbsOffset
+                                )
+
+                                cameraDistance = 12 * density
+                            }
+                    ) {
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .graphicsLayer {
+
+                                    shape = RoundedCornerShape(24.dp)
+
+                                    shadowElevation = 0f
+
+                                    scaleX =
+                                        if (isDraggingCard) {
+                                            1.02f
+                                        } else {
+                                            1f
+                                        }
+
+                                    scaleY =
+                                        if (isDraggingCard) {
+                                            1.02f
+                                        } else {
+                                            1f
+                                        }
+                                }
+                                .offset {
+
+                                    if (isCenter) {
+                                        IntOffset(
+                                            x = 0,
+                                            y = cardOffsetY.roundToInt()
+                                        )
+                                    } else {
+                                        IntOffset.Zero
+                                    }
+                                }
+                                .then(
+
+                                    if (isCenter) {
+
+                                        Modifier.pointerInput(Unit) {
+
+                                            detectDragGestures(
+
+                                                onDragStart = {
+                                                    isDraggingCard = true
+                                                },
+
+                                                onDragEnd = {
+
+                                                    isDraggingCard = false
+
+                                                    if (offsetY > dropThreshold) {
+
+                                                        scope.launch {
+                                                            animatedOffsetY.animateTo(
+                                                                targetValue = 900f,
+                                                                animationSpec = tween(
+                                                                    durationMillis = 150
+                                                                )
+                                                            )
+
+                                                            lastDraggedImage = pagerState.currentPage
+                                                            showOfferPopup = true
+                                                        }
+
+                                                    } else {
+
+                                                        offsetY = 0f
+
+                                                        scope.launch {
+
+                                                            animatedOffsetY.animateTo(
+                                                                targetValue = 0f,
+                                                                animationSpec = androidx.compose.animation.core.spring(
+                                                                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium
+                                                                )
+                                                            )
+                                                        }
+                                                    }
+                                                },
+
+                                                onDragCancel = {
+
+                                                    isDraggingCard = false
+
+                                                    offsetY = 0f
+
+                                                    scope.launch {
+
+                                                        animatedOffsetY.animateTo(
+                                                            targetValue = 0f,
+                                                            animationSpec = androidx.compose.animation.core.spring(
+                                                                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                                                                stiffness = androidx.compose.animation.core.Spring.StiffnessMedium
+                                                            )
+                                                        )
+                                                    }
+                                                },
+
+                                                onDrag = { change, dragAmount ->
+
+                                                    change.consume()
+
+                                                    offsetY =
+                                                        (
+                                                                offsetY +
+                                                                        dragAmount.y
+                                                                )
+                                                            .coerceAtLeast(0f)
+                                                }
+                                            )
+                                        }
+
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                        ) {
+
+                            OfferCardItem(
+                                title = "",
+                                isCenter = isCenter,
+                                imageUrl = images[page],
+                                glowColor = Color(0xFFE0DAD3)
+                            )
+                        }
+                    }
                 }
             }
 
-            BottomPocketCard(isHighlighted = isDraggingCard)
-
-        }
-
-
-        AnimatedVisibility(
-            visible = showOfferPopup,
-            enter = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
-            exit = scaleOut()
-        ) {
-            OfferPopupDialog(
-                onDismiss = {
-                    showOfferPopup = false
-                    offsetY = 0f
-                    scope.launch { animatedOffsetY.snapTo(0f) }
-                }
+            BottomPocketCard(
+                isHighlighted = isDraggingCard
             )
         }
     }
-}
 
+    if (showOfferPopup) {
+
+        Dialog(
+            onDismissRequest = {
+
+                showOfferPopup = false
+                offsetY = 0f
+
+                scope.launch {
+                    animatedOffsetY.snapTo(0f)
+                }
+            },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Color.Black.copy(alpha = 0.5f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+
+                OfferPopupDialog(
+                    imageUrl = images[lastDraggedImage],
+                    onDismiss = {
+
+                        showOfferPopup = false
+                        offsetY = 0f
+
+                        scope.launch {
+                            animatedOffsetY.snapTo(0f)
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun OfferCardItem(
@@ -187,26 +403,17 @@ fun OfferCardItem(
     isCenter: Boolean,
     glowColor: Color
 ) {
+
     Box(
         modifier = Modifier
-            .size(width = 240.dp, height = 240.dp)
-            .then(
-                if (isCenter) {
-                    Modifier.drawOuterGlow(glowColor)
-                } else {
-                    Modifier
-                }
+            .size(
+                width = 240.dp,
+                height = 240.dp
             )
-            .clip(RoundedCornerShape(24.dp))
-            .border(
-                width = if (isCenter) 2.dp else 1.dp,
-                color = if (isCenter) {
-                    glowColor
-                } else {
-                    Color.White.copy(alpha = 0.15f)
-                },
-                shape = RoundedCornerShape(24.dp)
+            .clip(
+                RoundedCornerShape(24.dp)
             )
+
     ) {
 
         AsyncImage(
@@ -214,58 +421,43 @@ fun OfferCardItem(
             contentDescription = title,
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(24.dp)),
+                .clip(
+                    RoundedCornerShape(24.dp)
+                ),
             contentScale = ContentScale.Crop
         )
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Color.Black.copy(alpha = 0.25f)
-                )
-        )
-
-        Column(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = title,
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = if (isCenter) {
-                    "Drag Down to Pocket"
-                } else {
-                    "Swipe to View"
-                },
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
     }
 }
 
 @Composable
-fun BottomPocketCard(isHighlighted: Boolean) {
+fun BottomPocketCard(
+    isHighlighted: Boolean
+) {
+
     Box(
         modifier = Modifier
-            .size(width = 300.dp, height = 80.dp)
-            .height(140.dp)
-            .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+            .size(
+                width = 332.dp,
+                height = 80.dp
+            )
+            .clip(
+                RoundedCornerShape(
+                    topStart = 32.dp,
+                    topEnd = 32.dp
+                )
+            )
             .background(
+
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF00E5FF).copy(alpha = if (isHighlighted) 0.35f else 0.12f),
+                        Color(0xFFF9A825).copy(
+                            alpha = if (isHighlighted) {
+                                0.35f
+                            } else {
+                                0.12f
+                            }
+                        ),
+
                         Color(0x00161A20)
                     )
                 )
@@ -274,82 +466,98 @@ fun BottomPocketCard(isHighlighted: Boolean) {
                 width = 1.5.dp,
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF00E5FF).copy(alpha = 0.6f),
-                        Color(0x00161A20)
+                        Color(0x8BF9A825).copy(
+                            alpha = 0.9f
+                        ),
+                        Color(0x00F9A825)
                     )
                 ),
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                shape = RoundedCornerShape(
+                    topStart = 36.dp,
+                    topEnd = 36.dp
+                )
             ),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
+
         Text(
             text = "DROP HERE",
             color = Color(0xFF889193),
             fontSize = 14.sp,
             fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(
+                top = 16.dp
+            )
         )
     }
 }
 
-
 @Composable
-fun OfferPopupDialog(onDismiss: () -> Unit) {
+fun OfferPopupDialog(
+    imageUrl: String,
+    onDismiss: () -> Unit
+) {
+
     Box(
         modifier = Modifier
-            .size(400.dp, 620.dp)
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color(0xFFF1EEEE))
-            .border(2.dp, Color(0xFF00E5FF), RoundedCornerShape(28.dp))
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+            .size(
+                width = 400.dp,
+                height = 620.dp
+            )
+            .clip(
+                RoundedCornerShape(28.dp)
+            )
+            .background(
+                Color(0xFFF1EEEE)
+            )
+            .border(
+                width = 2.dp,
+                color = Color(0xFF00E5FF),
+                shape = RoundedCornerShape(28.dp)
+            )
+
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(
+                    RoundedCornerShape(24.dp)
+                ),
+            contentScale = ContentScale.Crop
+        )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(
+                    Color.Black.copy(alpha = 0.55f)
+                )
+                .clickable {
+                    onDismiss()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+
             Text(
-                "OFFER UNLOCKED!",
-                color = Color(0xFF9FA9AB),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                text = "×",
+                color = Color.White,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                "50% OFF VIP ACCESS",
-                color = Color.Black,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 22.sp
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF00E5FF))
-                    .pointerInput(Unit) { detectDragGestures { _, _ -> onDismiss() } }
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
-            ) {
-                Text("CLAIM NOW", color = Color.Black, fontWeight = FontWeight.Bold)
-            }
         }
     }
 }
 
-
-fun Modifier.drawOuterGlow(color: Color) = this.drawWithContent {
-    val shadowPaint = Paint().asFrameworkPaint().apply {
-        isAntiAlias = true
-        this.color = Color(0xFFD9A4A4).toArgb()
-        maskFilter = BlurMaskFilter(40f, BlurMaskFilter.Blur.NORMAL)
-    }
-    drawIntoCanvas { canvas ->
-        canvas.nativeCanvas.drawRoundRect(
-            0f, 0f, size.width, size.height,
-            48f, 48f, shadowPaint
-        )
-    }
-    drawContent()
-}
 
 @Preview(showBackground = true)
 @Composable
 fun OfferScreenPreview() {
     OfferScreen()
 }
+
