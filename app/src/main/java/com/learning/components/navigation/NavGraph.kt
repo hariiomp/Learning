@@ -18,12 +18,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.learning.components.ui.screens.ButtonsScreen
 import com.learning.components.ui.screens.CardCarousel
-import com.learning.components.ui.screens.CardFly
 import com.learning.components.ui.screens.CircularProgressScreen
+import com.learning.components.ui.screens.DynamicCarouselScreen
 import com.learning.components.ui.screens.ExpandSearch
-import com.learning.components.ui.screens.ExpandableItem
 import com.learning.components.ui.screens.ExpandableScreen
-
 import com.learning.components.ui.screens.HomeScreen
 import com.learning.components.ui.screens.ListScreen
 import com.learning.components.ui.screens.MyCardFly
@@ -67,5 +65,6 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         composable(Screen.CircularProgressScreen.route) { CircularProgressScreen() }
         composable(Screen.OfferScreen.route) { OfferScreen() }
         composable(Screen.MyCardFly.route) { MyCardFly() }
+        composable (Screen.DynamicCarouselScreen.route) { DynamicCarouselScreen() }
 }
     }
