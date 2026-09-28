@@ -52,9 +52,9 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color(0xFF020B0C),
-                                titleContentColor = Color.White,
-                                navigationIconContentColor = Color.White
+                                containerColor = Color(0xFFFFFFFF),
+                                titleContentColor = Color.Black,
+                                navigationIconContentColor = Color.Black
                             )
 
                         )
