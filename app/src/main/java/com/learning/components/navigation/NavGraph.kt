@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.learning.components.ui.screens.AirQuality
 import com.learning.components.ui.screens.ButtonsScreen
 import com.learning.components.ui.screens.CardCarousel
 import com.learning.components.ui.screens.CardFly
@@ -67,5 +68,6 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         composable(Screen.CircularProgressScreen.route) { CircularProgressScreen() }
         composable(Screen.OfferScreen.route) { OfferScreen() }
         composable(Screen.MyCardFly.route) { MyCardFly() }
+        composable(Screen.AirQuality.route) { AirQuality() }
 }
     }
