@@ -1,6 +1,8 @@
 package com.learning.components.navigation
 
+import android.os.Build
 import android.provider.CalendarContract.Attendees.query
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,12 +26,15 @@ import com.learning.components.ui.screens.CircularProgressScreen
 import com.learning.components.ui.screens.ExpandSearch
 import com.learning.components.ui.screens.ExpandableItem
 import com.learning.components.ui.screens.ExpandableScreen
+import com.learning.components.ui.screens.FabricScreen
 
 import com.learning.components.ui.screens.HomeScreen
 import com.learning.components.ui.screens.ListScreen
 import com.learning.components.ui.screens.MyCardFly
 import com.learning.components.ui.screens.OfferScreen
+import com.learning.components.ui.screens.SwipeCard
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     var query by remember {
@@ -69,5 +74,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         composable(Screen.OfferScreen.route) { OfferScreen() }
         composable(Screen.MyCardFly.route) { MyCardFly() }
         composable(Screen.AirQuality.route) { AirQuality() }
+        composable(Screen.FabricScreen.route) { FabricScreen() }
+        composable(Screen.SwipeCard.route) { SwipeCard() }
 }
     }

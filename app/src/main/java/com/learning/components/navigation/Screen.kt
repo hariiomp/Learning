@@ -11,6 +11,8 @@ sealed class Screen(val route: String, val title: String) {
     data object OfferScreen: Screen("offerscreen", "Offer")
     data object MyCardFly: Screen("mycardfly", "My Card Fly")
     data object AirQuality: Screen("airquality", "Air Quality")
+    data object FabricScreen: Screen("fabricscreen", "")
+    data object SwipeCard: Screen("swipecard", "Swipe Card")
 }
 
 val allScreens = listOf(
@@ -23,4 +25,6 @@ val allScreens = listOf(
     Screen.OfferScreen,
     Screen.MyCardFly,
     Screen.AirQuality
+    Screen.FabricScreen,
+    Screen.SwipeCard
 )
